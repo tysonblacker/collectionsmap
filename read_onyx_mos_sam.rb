@@ -432,13 +432,16 @@ class Statement
 end
 
 
-def read_mos_commissions()
+def read_mos_commissions(statement_dir)
 
   segments = []
   puts "Loading the MOS commission data"
   count = 0
   segment_headers = Hash.new()
-  CSV.foreach( "./#{todays_date}/mos_commissions.csv" ) do |row|
+  
+  files = Dir["#{statement_dir}/Hotel Commission Report*.csv"]
+  files.each do |file|
+  CSV.foreach( file ) do |row|
     count += 1
     if count == 1
       #puts row
@@ -451,6 +454,7 @@ def read_mos_commissions()
     seg = Segment.new("mos_commissions", row, segment_headers)
     #puts seg.get_array
     segments << seg
+  end
   end
   puts "finished reading MOS commission segments there a of total #{count - 1}"
   segments
@@ -839,16 +843,16 @@ def now_text
 end
 
 def parse_files
+  statement_dir = "./#{todays_date}"
   mos_segment_headers = Hash.new{}
   segments = []
   #segments.concat(read_mos_segments())
-  segments.concat(read_mos_commissions())
+  segments.concat(read_mos_commissions(statement_dir))
   segments.concat(read_sabre_segments())
   puts segments.count
  
   #statement_dir = "./small_files"
   #statement_dir = "./Collectors"
-  statement_dir = "./#{todays_date}"
   
   statements = []
   statements.concat(read_medina_files(statement_dir))
